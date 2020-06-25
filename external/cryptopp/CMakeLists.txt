@@ -112,6 +112,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
   list(APPEND CRYPTOPP_COMPILE_OPTIONS -wd68 -wd186 -wd279 -wd327 -wd161 -wd3180)
 endif ()
 
+# DISABLE_ASM True if CRYPTOPP_AARCH32 and CRYPTOPP_AARCH64
+if ((CRYPTOPP_AARCH32) OR (CRYPTOPP_AARCH64) OR (CRYPTOPP_ARMHF) OR (CRYPTOPP_ARM))
+  set(DISABLE_ASM TRUE)
+endif ()
+
 # Also see http://github.com/weidai11/cryptopp/issues/395
 if (DISABLE_ASM)
   list(APPEND CRYPTOPP_COMPILE_DEFINITIONS CRYPTOPP_DISABLE_ASM)
@@ -667,8 +672,13 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU
         if (NOT CRYPTOPP_IA32_AES AND NOT DISABLE_AES)
           list(APPEND CRYPTOPP_COMPILE_OPTIONS "-DCRYPTOPP_DISABLE_AESNI")
         elseif (CRYPTOPP_IA32_AES AND NOT DISABLE_AES)
-          set_source_files_properties(${SRC_DIR}/rijndael_simd.cpp PROPERTIES COMPILE_FLAGS "-msse4.1 -maes")
-          set_source_files_properties(${SRC_DIR}/sm4_simd.cpp PROPERTIES COMPILE_FLAGS "-mssse3 -maes")
+          if (NOT "${LABEL}" STREQUAL "aarch32-linux-gnueabihf" AND NOT "${LABEL}" STREQUAL "aarch32-linux-gnueabi" AND NOT "${LABEL}" STREQUAL "aarch64")
+            set_source_files_properties(${SRC_DIR}/rijndael_simd.cpp PROPERTIES COMPILE_FLAGS "-msse4.1 -maes")
+            set_source_files_properties(${SRC_DIR}/sm4_simd.cpp PROPERTIES COMPILE_FLAGS "-mssse3 -maes")
+	      else ()
+            set_source_files_properties(${SRC_DIR}/rijndael_simd.cpp PROPERTIES COMPILE_FLAGS "-msse4.1")
+            set_source_files_properties(${SRC_DIR}/sm4_simd.cpp PROPERTIES COMPILE_FLAGS "-mssse3")
+          endif ()
         endif ()
         #if (NOT CRYPTOPP_IA32_AVX AND NOT DISABLE_AVX)
         # list(APPEND CRYPTOPP_COMPILE_OPTIONS "-DCRYPTOPP_DISABLE_AVX")
