@@ -124,7 +124,7 @@ jobs:
           if [[ "${TAG:5:4}" == "tags" ]]; then export TAG=${TAG:10}; else export TAG=${COMMIT_SHA}; fi
           cd build/src
           TARGETS="TurtleCoind miner zedwallet turtle-service cryptotest wallet-api wallet-upgrader"
-          if [[ "${LABEL}" != "aarch64" ]]; then strip ${TARGETS}; fi
+          if [[ "${LABEL}" != "aarch64" && "${LABEL}" != "aarch32-linux-gnueabi" && "${LABEL}" != "aarch32-linux-gnueabihf" ]]; then strip ${TARGETS}; fi
           rm -rf turtlecoin-${TAG}
           mkdir turtlecoin-${TAG}
           cp ${TARGETS} turtlecoin-${TAG}/
